@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BuildMate — Lead & Estimate Manager</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Vazirmatn:wght@400;500;600;700&display=swap');
+
+  :root{
+    --bg:#0f1419;
+    --panel:#171f29;
+    --panel-2:#1e2935;
+    --line:#2a3744;
+    --txt:#e8edf2;
+    --muted:#8a99a8;
+    --accent:#ff7a3d;
+    --accent-2:#3dd6a0;
+    --blue:#4a9eff;
+    --yellow:#ffc24a;
+    --red:#ff5d5d;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--txt);
+    font-family:'Sora',sans-serif;
+    min-height:100vh;
+    background-image:radial-gradient(circle at 12% 8%,rgba(255,122,61,.07),transparent 40%),radial-gradient(circle at 88% 92%,rgba(61,214,160,.06),transparent 42%);
+  }
+  body.fa{font-family:'Vazirmatn',sans-serif;direction:rtl}
+  .wrap{max-width:1180px;margin:0 auto;padding:20px 18px 80px}
+
+  /* header */
+  header{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#ff5a1f);display:grid;place-items:center;font-weight:800;font-size:20px;color:#fff;box-shadow:0 4px 18px rgba(255,122,61,.4)}
+  .brand h1{font-size:20px;font-weight:800;letter-spacing:-.3px}
+  .brand p{font-size:12px;color:var(--muted);font-weight:500}
+  .lang-toggle{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .lang-toggle button{background:none;border:none;color:var(--muted);padding:8px 16px;font-family:inherit;font-weight:600;font-size:13px;cursor:pointer;transition:.2s}
+  .lang-toggle button.on{background:var(--accent);color:#fff}
+
+  /* tabs */
+  .tabs{display:flex;gap:6px;margin-bottom:20px;background:var(--panel);padding:6px;border-radius:12px;border:1px solid var(--line);width:fit-content;flex-wrap:wrap}
+  .tabs button{background:none;border:none;color:var(--muted);padding:10px 18px;border-radius:8px;font-family:inherit;font-weight:600;font-size:13px;cursor:pointer;transition:.2s}
+  .tabs button.on{background:var(--panel-2);color:var(--txt)}
+
+  .view{display:none}
+  .view.on{display:block;animation:fade .35s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  /* pipeline */
+  .board{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  @media(max-width:900px){.board{grid-template-columns:1fr 1fr}}
+  @media(max-width:560px){.board{grid-template-columns:1fr}}
+  .col{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px;min-height:120px}
+  .col-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .col-head .dot{width:9px;height:9px;border-radius:50%}
+  .col-head span{font-size:12px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:var(--muted)}
+  .col-head .ct{background:var(--panel-2);color:var(--muted);font-size:11px;padding:2px 8px;border-radius:20px}
+  .lead{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px;cursor:grab;transition:.18s}
+  .lead:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .lead .nm{font-weight:700;font-size:14px;margin-bottom:3px}
+  .lead .jt{font-size:12px;color:var(--accent-2);font-weight:600;margin-bottom:6px}
+  .lead .meta{font-size:11px;color:var(--muted);line-height:1.5}
+  .lead .pr{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;margin-top:8px}
+  .pr.hi{background:rgba(255,93,93,.16);color:var(--red)}
+  .pr.md{background:rgba(255,194,74,.16);color:var(--yellow)}
+  .pr.lo{background:rgba(74,158,255,.16);color:var(--blue)}
+  .lead .src{font-size:10px;color:var(--muted);opacity:.7;margin-top:4px}
+  .mv{display:flex;gap:4px;margin-top:9px}
+  .mv button{flex:1;background:var(--bg);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:4px;font-size:14px;cursor:pointer;font-family:inherit;transition:.15s}
+  .mv button:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* import box */
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:18px}
+  .panel h2{font-size:15px;margin-bottom:4px}
+  .panel .sub{font-size:12px;color:var(--muted);margin-bottom:16px}
+  textarea,input,select{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:9px;color:var(--txt);padding:12px;font-family:inherit;font-size:13px;resize:vertical}
+  textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
+  label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin:12px 0 5px}
+  .btn{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:12px 22px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;transition:.2s;margin-top:14px}
+  .btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+  .btn.ghost{background:var(--panel-2);color:var(--txt);border:1px solid var(--line)}
+  .btn.sm{padding:8px 14px;margin-top:0;font-size:12px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:560px){.row{grid-template-columns:1fr}}
+  .parsed{background:rgba(61,214,160,.07);border:1px solid rgba(61,214,160,.3);border-radius:10px;padding:14px;margin-top:14px;display:none}
+  .parsed.on{display:block;animation:fade .3s}
+  .parsed .pf{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}
+  .parsed .pf:last-child{border:none}
+  .parsed .pf b{color:var(--accent-2)}
+
+  /* estimator */
+  .est-msg{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:12px;animation:fade .3s}
+  .est-msg.ai{border-left:3px solid var(--accent)}
+  body.fa .est-msg.ai{border-left:none;border-right:3px solid var(--accent)}
+  .est-msg .who{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--accent);margin-bottom:6px}
+  .est-msg .q{font-size:14px;line-height:1.6}
+  .est-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .calc-line{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;color:var(--muted)}
+  .calc-line b{color:var(--txt)}
+  .total-box{background:linear-gradient(135deg,rgba(255,122,61,.13),rgba(61,214,160,.08));border:1px solid var(--line);border-radius:12px;padding:18px;margin-top:14px}
+  .total-box .big{font-size:30px;font-weight:800;color:var(--accent)}
+  .total-box .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s}
+  .chip:hover{border-color:var(--accent)}
+  .note{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6;font-style:italic}
+  .hidden{display:none!important}
+  .empty{text-align:center;color:var(--muted);font-size:12px;padding:20px 0}
+  .badge{display:inline-block;background:rgba(74,158,255,.14);color:var(--blue);font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;margin-left:8px}
+  body.fa .badge{margin-left:0;margin-right:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo">B</div>
+      <div>
+        <h1 data-en="BuildMate" data-fa="بیلد‌میت">BuildMate</h1>
+        <p data-en="Lead & Estimate Manager · Stage 1 Prototype" data-fa="مدیریت لید و تخمین · نمونه مرحله ۱">Lead & Estimate Manager · Stage 1 Prototype</p>
+      </div>
+    </div>
+    <div class="lang-toggle">
+      <button id="enBtn" class="on" onclick="setLang('en')">EN</button>
+      <button id="faBtn" onclick="setLang('fa')">فارسی</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="on" onclick="showView('pipeline',this)" data-en="Lead Pipeline" data-fa="مسیر لیدها">Lead Pipeline</button>
+    <button onclick="showView('import',this)" data-en="Add Lead" data-fa="افزودن لید">Add Lead</button>
+    <button onclick="showView('estimate',this)" data-en="Rough Estimate" data-fa="تخمین اولیه">Rough Estimate</button>
+  </div>
+
+  <!-- PIPELINE -->
+  <div id="pipeline" class="view on">
+    <div class="board" id="board"></div>
+  </div>
+
+  <!-- IMPORT -->
+  <div id="import" class="view">
+    <div class="panel">
+      <h2 data-en="Paste a lead message" data-fa="متن لید را بچسبانید">Paste a lead message</h2>
+      <p class="sub" data-en="Paste the text from Checkatrade / MyBuilder / WhatsApp / email. The app reads it and pulls out the details. You confirm before saving." data-fa="متن را از Checkatrade / MyBuilder / واتساپ / ایمیل بچسبانید. اپ آن را می‌خواند و جزئیات را درمی‌آورد. قبل از ذخیره شما تأیید می‌کنید.">Paste the text from Checkatrade / MyBuilder / WhatsApp / email. The app reads it and pulls out the details. You confirm before saving.</p>
+      <textarea id="rawLead" rows="6" placeholder="e.g. Hi, I'm Sarah from Croydon CR0. Looking for a builder to tile my kitchen floor, about 14 sqm. Would like a quote please. 07700 900123"></textarea>
+      <button class="btn" onclick="parseLead()" data-en="Read it" data-fa="بخوان">Read it</button>
+
+      <div class="parsed" id="parsed">
+        <div class="pf"><span data-en="Client name" data-fa="نام مشتری">Client name</span><b id="p_name">—</b></div>
+        <div class="pf"><span data-en="Job type" data-fa="نوع کار">Job type</span><b id="p_job">—</b></div>
+        <div class="pf"><span data-en="Area / postcode" data-fa="منطقه / کدپستی">Area / postcode</span><b id="p_area">—</b></div>
+        <div class="pf"><span data-en="Size" data-fa="اندازه">Size</span><b id="p_size">—</b></div>
+        <div class="pf"><span data-en="Phone" data-fa="تلفن">Phone</span><b id="p_phone">—</b></div>
+        <label data-en="Source" data-fa="منبع">Source</label>
+        <select id="p_source">
+          <option>Checkatrade</option><option>MyBuilder</option><option>Rated People</option>
+          <option>Bark</option><option>TrustATrader</option><option>WhatsApp</option><option>Email</option><option>Other</option>
+        </select>
+        <label data-en="Priority" data-fa="اولویت">Priority</label>
+        <select id="p_priority">
+          <option value="hi" data-en="High" data-fa="بالا">High</option>
+          <option value="md" data-en="Medium" data-fa="متوسط" selected>Medium</option>
+          <option value="lo" data-en="Low" data-fa="پایین">Low</option>
+        </select>
+        <button class="btn" onclick="saveLead()" data-en="Save to pipeline" data-fa="ذخیره در مسیر">Save to pipeline</button>
+        <button class="btn ghost" onclick="document.getElementById('parsed').classList.remove('on')" data-en="Cancel" data-fa="لغو">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESTIMATE -->
+  <div id="estimate" class="view">
+    <div class="panel">
+      <h2 data-en="Step-by-step rough estimate" data-fa="تخمین اولیه قدم‌به‌قدم">Step-by-step rough estimate <span class="badge">AI = assistant</span></h2>
+      <p class="sub" data-en="The app suggests each number. You check it against the drawing and confirm. AI helps you — you stay in control." data-fa="اپ هر عدد را پیشنهاد می‌دهد. شما روی نقشه چک و تأیید می‌کنید. AI به شما کمک می‌کند — کنترل با شماست.">The app suggests each number. You check it against the drawing and confirm. AI helps you — you stay in control.</p>
+      <div id="estFlow"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- DATA ---------- */
+const STAGES = [
+  {key:'new',   en:'New',     fa:'جدید',     color:'#4a9eff'},
+  {key:'visit', en:'Visited', fa:'بازدید شد', color:'#ffc24a'},
+  {key:'quote', en:'Quoted',  fa:'قیمت داده', color:'#b07aff'},
+  {key:'start', en:'Started', fa:'شروع شد',  color:'#3dd6a0'},
+  {key:'done',  en:'Won/Lost',fa:'برنده/باخت',color:'#8a99a8'}
+];
+let leads = [
+  {id:1,name:'Sarah M.',job:'Kitchen floor tiling',area:'Croydon CR0',size:'14 m²',phone:'07700 900123',source:'Checkatrade',priority:'hi',stage:'new'},
+  {id:2,name:'James P.',job:'Bathroom refit',area:'Bromley BR1',size:'6 m²',phone:'07700 900456',source:'MyBuilder',priority:'md',stage:'visit'},
+  {id:3,name:'Aisha K.',job:'Rear extension',area:'Lewisham SE13',size:'20 m²',phone:'07700 900789',source:'WhatsApp',priority:'hi',stage:'quote'}
+];
+let lang='en', uid=4;
+
+/* ---------- LANG ---------- */
+function setLang(l){
+  lang=l;
+  document.body.classList.toggle('fa',l==='fa');
+  document.getElementById('enBtn').classList.toggle('on',l==='en');
+  document.getElementById('faBtn').classList.toggle('on',l==='fa');
+  document.querySelectorAll('[data-en]').forEach(el=>{
+    const t=el.getAttribute('data-'+l);
+    if(t!==null){ if(el.tagName==='OPTION') el.textContent=t; else el.childNodes[0]&&el.childNodes[0].nodeType===3?el.childNodes[0].textContent=t:el.textContent=t; }
+  });
+  renderBoard();
+}
+const T=(en,fa)=>lang==='fa'?fa:en;
+
+/* ---------- VIEWS ---------- */
+function showView(id,btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(id==='estimate' && !document.getElementById('estFlow').dataset.started) startEstimate();
+}
+
+/* ---------- PIPELINE ---------- */
+function renderBoard(){
+  const b=document.getElementById('board'); b.innerHTML='';
+  STAGES.forEach((st,i)=>{
+    const items=leads.filter(l=>l.stage===st.key);
+    const col=document.createElement('div'); col.className='col';
+    col.innerHTML=`<div class="col-head"><div style="display:flex;align-items:center;gap:8px"><span class="dot" style="background:${st.color}"></span><span>${T(st.en,st.fa)}</span></div><span class="ct">${items.length}</span></div>`;
+    if(!items.length) col.innerHTML+=`<div class="empty">—</div>`;
+    items.forEach(l=>{
+      const prTxt={hi:T('High','بالا'),md:T('Medium','متوسط'),lo:T('Low','پایین')}[l.priority];
+      const card=document.createElement('div'); card.className='lead';
+      card.innerHTML=`
+        <div class="nm">${l.name}</div>
+        <div class="jt">${l.job}</div>
+        <div class="meta">📍 ${l.area}<br>📐 ${l.size} · 📞 ${l.phone}</div>
+        <span class="pr ${l.priority}">${prTxt}</span>
+        <div class="src">${T('via','از')} ${l.source}</div>
+        <div class="mv">
+          ${i>0?`<button onclick="move(${l.id},-1)" title="back">‹</button>`:''}
+          ${i<STAGES.length-1?`<button onclick="move(${l.id},1)" title="forward">›</button>`:''}
+        </div>`;
+      col.appendChild(card);
+    });
+    b.appendChild(col);
+  });
+}
+function move(id,dir){
+  const l=leads.find(x=>x.id===id);
+  const idx=STAGES.findIndex(s=>s.key===l.stage)+dir;
+  if(idx>=0&&idx<STAGES.length){l.stage=STAGES[idx].key;renderBoard();}
+}
+
+/* ---------- PARSE LEAD (rule-based demo) ---------- */
+function parseLead(){
+  const raw=document.getElementById('rawLead').value;
+  if(!raw.trim()){alert(T('Paste some text first','اول متنی بچسبانید'));return;}
+  const nameM=raw.match(/\b(?:I'?m|I am|this is|name is|from)\s+([A-Z][a-z]+)/);
+  const phoneM=raw.match(/(0\d{3,4}\s?\d{3}\s?\d{3,4})/);
+  const postM=raw.match(/\b([A-Z]{1,2}\d{1,2}[A-Z]?)\b/);
+  const sizeM=raw.match(/(\d+(?:\.\d+)?)\s?(?:sqm|sq m|m2|m²|square met)/i);
+  const jobs=[['tile','Tiling'],['bathroom','Bathroom refit'],['kitchen','Kitchen work'],['extension','Extension'],['roof','Roofing'],['plaster','Plastering'],['paint','Painting & decorating'],['floor','Flooring'],['loft','Loft conversion'],['wall','Brick/Block work']];
+  let job='General building';
+  for(const[k,v]of jobs){if(raw.toLowerCase().includes(k)){job=v;break;}}
+  document.getElementById('p_name').textContent=nameM?nameM[1]:T('(check)','(بررسی)');
+  document.getElementById('p_job').textContent=job;
+  document.getElementById('p_area').textContent=postM?postM[1]:T('(check)','(بررسی)');
+  document.getElementById('p_size').textContent=sizeM?sizeM[1]+' m²':T('(ask client)','(از مشتری بپرسید)');
+  document.getElementById('p_phone').textContent=phoneM?phoneM[1]:T('(check)','(بررسی)');
+  document.getElementById('parsed').classList.add('on');
+}
+function saveLead(){
+  leads.push({
+    id:uid++,
+    name:document.getElementById('p_name').textContent,
+    job:document.getElementById('p_job').textContent,
+    area:document.getElementById('p_area').textContent,
+    size:document.getElementById('p_size').textContent,
+    phone:document.getElementById('p_phone').textContent,
+    source:document.getElementById('p_source').value,
+    priority:document.getElementById('p_priority').value,
+    stage:'new'
+  });
+  document.getElementById('parsed').classList.remove('on');
+  document.getElementById('rawLead').value='';
+  renderBoard();
+  document.querySelector('.tabs button').click();
+}
+
+/* ---------- ESTIMATOR (step-by-step, confirm each step) ---------- */
+// demo rates (£/m²) — in real app these come from a live price DB
+const RATES={'Tiling':{labour:35,material:28},'Plastering':{labour:18,material:9},'Painting & decorating':{labour:12,material:6},'Flooring':{labour:22,material:30}};
+let est={};
+function startEstimate(){
+  document.getElementById('estFlow').dataset.started='1';
+  est={trade:'Tiling',area:null,risk:0.1};
+  const f=document.getElementById('estFlow'); f.innerHTML='';
+  aiMsg(T(
+    "Let's build a rough estimate together. I'll suggest each number — you check it on the drawing and confirm. First: what's the trade? I'll assume <b>Tiling</b> for this demo.",
+    "بیایید با هم یک تخمین اولیه بسازیم. من هر عدد را پیشنهاد می‌دهم — شما روی نقشه چک و تأیید کنید. اول: نوع کار چیست؟ برای این نمونه فرض می‌کنم <b>کاشی‌کاری (Tiling)</b>."
+  ));
+  ask(T("Confirm trade = Tiling?","تأیید نوع کار = کاشی‌کاری؟"),[
+    {t:T("✓ Yes, tiling","✓ بله، کاشی‌کاری"),fn:askArea},
+    {t:T("Change","تغییر"),fn:()=>aiMsg(T("No problem — in the full version you'd pick from a list. For now we continue with tiling.","مشکلی نیست — در نسخه کامل از یک لیست انتخاب می‌کنید. فعلاً با کاشی‌کاری ادامه می‌دهیم."))||askArea()}
+  ]);
+}
+function askArea(){
+  aiMsg(T(
+    "Good. Now the area. Say the wall/floor is <b>3.0 m × 2.4 m</b>. That gives <b>7.2 m²</b>. Check this against your drawing.",
+    "خوب. حالا مساحت. فرض کنیم دیوار/کف <b>۳.۰ × ۲.۴ متر</b> است. یعنی <b>۷.۲ متر مربع</b>. این را روی نقشه‌تان چک کنید."
+  ));
+  const id='area'+Date.now();
+  const div=document.createElement('div'); div.className='est-msg';
+  div.innerHTML=`<div class="who">${T('Your turn','نوبت شما')}</div>
+    <label>${T('Confirm or correct the area (m²)','تأیید یا اصلاح مساحت (متر مربع)')}</label>
+    <input id="${id}" type="number" value="7.2" step="0.1">
+    <div class="est-actions"><button class="btn sm" onclick="confirmArea('${id}')">${T('Confirm','تأیید')}</button></div>`;
+  document.getElementById('estFlow').appendChild(div); scroll();
+}
+function confirmArea(id){
+  est.area=parseFloat(document.getElementById(id).value)||7.2;
+  aiMsg(T(
+    `Locked in: <b>${est.area} m²</b>. Now pricing. For tiling I'm using demo rates — labour <b>£${RATES.Tiling.labour}/m²</b> and materials <b>£${RATES.Tiling.material}/m²</b>. In the real app these update live from B&Q / Wickes and local labour data. OK to use these?`,
+    `ثبت شد: <b>${est.area} متر مربع</b>. حالا قیمت‌گذاری. برای کاشی‌کاری از نرخ‌های نمونه استفاده می‌کنم — دستمزد <b>£${RATES.Tiling.labour}</b> و مصالح <b>£${RATES.Tiling.material}</b> هر متر. در نسخه واقعی این‌ها زنده از B&Q / Wickes و داده‌های دستمزد محلی به‌روز می‌شوند. تأیید می‌کنید؟`
+  ));
+  ask(T("Use these rates?","از این نرخ‌ها استفاده شود؟"),[
+    {t:T("✓ Yes","✓ بله"),fn:askRisk},
+    {t:T("I'll set my own later","بعداً خودم تنظیم می‌کنم"),fn:askRisk}
+  ]);
+}
+function askRisk(){
+  aiMsg(T(
+    "One more thing experienced builders always add: a <b>risk / contingency</b> margin for surprises (uneven walls, access, waste). Common is 10–15%. What shall we add?",
+    "یک چیز که سازنده‌های باتجربه همیشه اضافه می‌کنند: حاشیه <b>ریسک / احتمالی</b> برای غافلگیری‌ها (دیوار ناصاف، دسترسی، پرت مصالح). معمول ۱۰ تا ۱۵٪ است. چقدر اضافه کنیم؟"
+  ));
+  ask(T("Risk margin","حاشیه ریسک"),[
+    {t:"10%",fn:()=>{est.risk=.10;showTotal();}},
+    {t:"15%",fn:()=>{est.risk=.15;showTotal();}},
+    {t:"20%",fn:()=>{est.risk=.20;showTotal();}}
+  ]);
+}
+function showTotal(){
+  const r=RATES.Tiling;
+  const labour=est.area*r.labour, material=est.area*r.material;
+  const sub=labour+material;
+  const risk=sub*est.risk;
+  const total=sub+risk;
+  const div=document.createElement('div'); div.className='est-msg ai';
+  div.innerHTML=`<div class="who">${T('Rough estimate','تخمین اولیه')}</div>
+    <div class="calc-line"><span>${T('Labour','دستمزد')} (${est.area} m² × £${r.labour})</span><b>£${labour.toFixed(0)}</b></div>
+    <div class="calc-line"><span>${T('Materials','مصالح')} (${est.area} m² × £${r.material})</span><b>£${material.toFixed(0)}</b></div>
+    <div class="calc-line"><span>${T('Subtotal','جمع جزء')}</span><b>£${sub.toFixed(0)}</b></div>
+    <div class="calc-line"><span>${T('Risk margin','حاشیه ریسک')} (${(est.risk*100)}%)</span><b>£${risk.toFixed(0)}</b></div>
+    <div class="total-box">
+      <div class="lbl">${T('Rough estimate (excl. VAT)','تخمین اولیه (بدون مالیات)')}</div>
+      <div class="big">£${total.toFixed(0)}</div>
+    </div>
+    <div class="note">${T(
+      '⚠️ This is a ROUGH figure to start a conversation fast — not a final quote. Next stage breaks each part down further, with you confirming every step. AI assists; you decide.',
+      '⚠️ این یک رقم اولیه است برای شروع سریع گفتگو — نه قیمت نهایی. مرحله بعد هر بخش را بیشتر می‌شکند، با تأیید شما در هر قدم. AI کمک می‌کند؛ شما تصمیم می‌گیرید.'
+    )}</div>
+    <div class="est-actions">
+      <button class="btn sm" onclick="startEstimate()">${T('↺ Start over','↺ از نو')}</button>
+    </div>`;
+  document.getElementById('estFlow').appendChild(div); scroll();
+}
+
+/* helpers */
+function aiMsg(html){
+  const d=document.createElement('div'); d.className='est-msg ai';
+  d.innerHTML=`<div class="who">${T('BuildMate AI','دستیار بیلد‌میت')}</div><div class="q">${html}</div>`;
+  document.getElementById('estFlow').appendChild(d); scroll();
+}
+function ask(title,opts){
+  const d=document.createElement('div'); d.className='est-msg';
+  let btns=opts.map((o,i)=>`<button class="chip" data-i="${i}">${o.t}</button>`).join('');
+  d.innerHTML=`<div class="who">${T('Choose','انتخاب کنید')}</div><div class="est-actions">${btns}</div>`;
+  document.getElementById('estFlow').appendChild(d);
+  d.querySelectorAll('.chip').forEach((b,i)=>b.onclick=()=>{d.querySelectorAll('.chip').forEach(x=>x.style.opacity=.4);b.style.opacity=1;b.style.borderColor='var(--accent)';opts[i].fn();});
+  scroll();
+}
+function scroll(){window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});}
+
+/* init */
+renderBoard();
+</script>
+</body>
+</html>
